@@ -72,12 +72,16 @@ async def on_message(message: discord.Message):
 async def on_reaction_add(reaction: discord.reaction.Reaction, user):
     global last_burger_message
 
+    if last_burger_message is None:
+        return
     if reaction.message.id != last_burger_message.id:
         return
     if user.id == bot.application_id:
         return
     if user.id != last_burger_message.author.id:
         return
+
+    last_burger_message = None
     print('hooo')
 
 
