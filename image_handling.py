@@ -1,3 +1,6 @@
+"""
+Functions to handle image processing such as downscaling, cropping, etc.
+"""
 from PIL import Image
 import requests
 

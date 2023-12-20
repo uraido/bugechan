@@ -1,3 +1,6 @@
+"""
+Functions that utilize discord.py, but aren't bot commands by themselves.
+"""
 from image_effects import mugify_image
 from image_handling import download_image
 import discord

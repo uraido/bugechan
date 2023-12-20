@@ -1,3 +1,6 @@
+"""
+Functions to apply effects (mostly overlays) on images.
+"""
 from PIL import Image
 from image_handling import scaling_algorithm, cropping_algorithm
 
