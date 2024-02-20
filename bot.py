@@ -13,9 +13,9 @@ from image_handling import download_image
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 
 # instantiates discord objects
-intents = discord.Intents.default()
+intents = discord.Intents(messages=True, members=True, guilds=True)
 intents.message_content = True
-bot = commands.Bot(command_prefix='bgd.', intents=intents)
+bot = commands.Bot(command_prefix='bg.', intents=intents)
 
 # -------------------------------- COMMANDS
 
@@ -49,7 +49,47 @@ async def approve(ctx):
         print(e)
 
 # -------------------------------- EVENTS
-last_burger_message = None
+
+# join server
+@bot.event
+async def on_member_join(member):
+    from image_effects import mugify_image
+
+    # proccess image
+    image = download_image(member.avatar.url)
+    mugify_image(image, 'images/mugi.png')
+    file = discord.File('overlayed.png', filename='overlayed.png')
+
+    # create embed
+    embed = discord.Embed(title=f'{member.name} is tasty 😋', color=16098851)
+    embed.set_image(url="attachment://overlayed.png")
+
+    # get welcome channel
+    channel = bot.get_channel(1129245891723796530)
+
+    # send message
+    await channel.send(file=file, embed=embed)
+
+    # cleanup
+    os.remove('image.png')
+    os.remove('overlayed.png')
+
+
+# leave server
+@bot.event
+async def on_raw_member_remove(payload):
+    # create embed
+    embed = discord.Embed(title=f'{payload.user.name} became vegan 🤮', colour=5111634)
+    embed.set_image(url='https://cdn.discordapp.com/attachments/1129220202140291165/1129247524176285696/Vegan-Caesar-Braai-Salad-e1688121116658.png?ex=65e14636&is=65ced136&hm=83117be3a131065e6781680ead6c959b0883702ade785fd40bdf0e7b1e30cfac&')
+
+    # get welcome channel
+    channel = bot.get_channel(1129245891723796530)
+
+    # send message
+    await channel.send(embed=embed)
+
+# add reaction stuff
+'''last_burger_message = None
 
 
 @bot.event
@@ -82,9 +122,9 @@ async def on_reaction_add(reaction: discord.reaction.Reaction, user):
         return
 
     last_burger_message = None
-    print('hooo')
+    print('hooo')'''
 
 
 # starts bot
 token = open('keys/discord_token.txt', 'r').read().strip()
-bot.run(token, log_handler=handler, log_level=logging.DEBUG)
+bot.run(token)  # log_handler=handler, log_level=logging.DEBUG)
