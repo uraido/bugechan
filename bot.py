@@ -6,8 +6,11 @@ import discord
 import logging
 from discord.ext import commands
 from discord_functions import mugify_message
-from image_effects import approve_image
+from image_effects import approve_image, mugify_image
 from image_handling import download_image
+
+# settings
+reaction_channel_id = 1129259304868905040
 
 # instantiates log handler object
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
@@ -16,7 +19,7 @@ handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w'
 intents = discord.Intents(messages=True, members=True, guilds=True)
 intents.message_content = True
 intents.reactions = True
-bot = commands.Bot(command_prefix='bg.', intents=intents)
+bot = commands.Bot(command_prefix='bgd.', intents=intents)
 
 # -------------------------------- COMMANDS
 
@@ -99,7 +102,7 @@ async def on_message(message: discord.Message):
     global last_burger_message
 
     # if in right channel, not the bot itself, and contains an image...
-    if message.channel.name != 'testes-bugechan':
+    if message.channel.id != reaction_channel_id:
         return
     if message.author.id == bot.application_id:
         return
@@ -129,6 +132,9 @@ async def on_message(message: discord.Message):
 async def on_reaction_add(reaction: discord.reaction.Reaction, user):
     global last_burger_message
 
+    # checks if the original message was reacted to by the actor
+    if reaction.emoji != bot.get_emoji(1209922997649936424):
+        return
     if last_burger_message is None:
         return
     if reaction.message.id != last_burger_message.id:
@@ -138,6 +144,23 @@ async def on_reaction_add(reaction: discord.reaction.Reaction, user):
     if user.id != last_burger_message.author.id:
         return
 
+    channel = bot.get_channel(reaction_channel_id)
+
+    # processes image
+    image = download_image(last_burger_message.attachments[0].url)
+    await last_burger_message.delete()
+    temp_msg = await channel.send(content='Mugifying...')
+    mugify_image(image, 'images/mugi.png')
+    await temp_msg.delete()
+    await channel.send(
+        content=f"{last_burger_message.author.mention}'s amazing burger!", file=discord.File('overlayed.png'))
+
+    # cleanup
+    try:
+        os.remove('image.png')
+    except FileNotFoundError:
+        os.remove('image.jpg')
+    os.remove('overlayed.png')
     last_burger_message = None
 
 # starts bot
