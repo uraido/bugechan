@@ -15,6 +15,7 @@ handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w'
 # instantiates discord objects
 intents = discord.Intents(messages=True, members=True, guilds=True)
 intents.message_content = True
+intents.reactions = True
 bot = commands.Bot(command_prefix='bg.', intents=intents)
 
 # -------------------------------- COMMANDS
@@ -89,9 +90,10 @@ async def on_raw_member_remove(payload):
     await channel.send(embed=embed)
 
 # add reaction stuff
-'''last_burger_message = None
+last_burger_message = None
 
 
+# adds 'mugify' reaction to messages with images in the burger-posting channel
 @bot.event
 async def on_message(message: discord.Message):
     global last_burger_message
@@ -104,10 +106,25 @@ async def on_message(message: discord.Message):
     if not message.attachments:
         return
 
+    # checking for image
+    is_image = False
+    if '.png' in message.attachments[0].url:
+        is_image = True
+    elif '.jpg' in message.attachments[0].url:
+        is_image = True
+    elif '.jpeg' in message.attachments[0].url:
+        is_image = True
+
+    if not is_image:
+        return
+
+    emoji = bot.get_emoji(1209922997649936424)
+
     last_burger_message = message
-    await message.add_reaction('✅')
+    await message.add_reaction(str(emoji))
 
 
+# if the added 'mugify' reaction is pressed, mugifies the image
 @bot.event
 async def on_reaction_add(reaction: discord.reaction.Reaction, user):
     global last_burger_message
@@ -122,8 +139,6 @@ async def on_reaction_add(reaction: discord.reaction.Reaction, user):
         return
 
     last_burger_message = None
-    print('hooo')'''
-
 
 # starts bot
 token = open('keys/discord_token.txt', 'r').read().strip()
