@@ -19,7 +19,7 @@ handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w'
 intents = discord.Intents(messages=True, members=True, guilds=True)
 intents.message_content = True
 intents.reactions = True
-bot = commands.Bot(command_prefix='bgd.', intents=intents)
+bot = commands.Bot(command_prefix='bg.', intents=intents)
 
 # -------------------------------- COMMANDS
 
@@ -103,10 +103,14 @@ async def on_message(message: discord.Message):
 
     # if in right channel, not the bot itself, and contains an image...
     if message.channel.id != reaction_channel_id:
+        # needed for the bot to keep processing commands
+        await bot.process_commands(message)
         return
     if message.author.id == bot.application_id:
+        await bot.process_commands(message)
         return
     if not message.attachments:
+        await bot.process_commands(message)
         return
 
     # checking for image
@@ -119,12 +123,12 @@ async def on_message(message: discord.Message):
         is_image = True
 
     if not is_image:
+        await bot.process_commands(message)
         return
 
     emoji = bot.get_emoji(1209922997649936424)
 
     last_burger_message = message
-    await message.add_reaction(str(emoji))
 
 
 # if the added 'mugify' reaction is pressed, mugifies the image
@@ -165,4 +169,4 @@ async def on_reaction_add(reaction: discord.reaction.Reaction, user):
 
 # starts bot
 token = open('keys/discord_token.txt', 'r').read().strip()
-bot.run(token)  # log_handler=handler, log_level=logging.DEBUG)
+bot.run(token, log_handler=handler, log_level=logging.DEBUG)
